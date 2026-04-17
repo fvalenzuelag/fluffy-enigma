@@ -1,0 +1,13 @@
+{
+  "name": "demo-docker-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frontend de ejemplo que habla con los backends vía proxy (taller Docker)",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "http-proxy-middleware": "^3.0.2"
+  }
+}

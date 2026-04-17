@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Taller Docker — Demo</title>
+    <style>
+      :root {
+        font-family: system-ui, sans-serif;
+        line-height: 1.5;
+        color: #1a1a1a;
+        background: #f4f4f5;
+      }
+      body {
+        max-width: 40rem;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      h1 {
+        font-size: 1.35rem;
+      }
+      section {
+        background: #fff;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin: 1rem 0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      }
+      button {
+        cursor: pointer;
+        padding: 0.45rem 0.9rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: #fafafa;
+      }
+      pre {
+        background: #27272a;
+        color: #e4e4e7;
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        overflow: auto;
+        font-size: 0.85rem;
+      }
+      .hint {
+        font-size: 0.9rem;
+        color: #52525b;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Demo: Docker Compose (Node + Java + Python)</h1>
+    <p class="hint">
+      Esta página se sirve desde el contenedor Node. Los datos JSON vienen de los backends a través del
+      proxy del mismo Node (así el navegador no necesita resolver nombres internos de Docker).
+    </p>
+
+    <section>
+      <h2>Backend Java</h2>
+      <p><button type="button" id="btn-java">Llamar /api/java/api/hello</button></p>
+      <pre id="out-java">(sin datos)</pre>
+    </section>
+
+    <section>
+      <h2>Backend Python</h2>
+      <p><button type="button" id="btn-python">Llamar /api/python/api/hello</button></p>
+      <pre id="out-python">(sin datos)</pre>
+    </section>
+
+    <script>
+      async function fetchJson(url, el) {
+        el.textContent = "Cargando…";
+        try {
+          const r = await fetch(url);
+          const text = await r.text();
+          try {
+            el.textContent = JSON.stringify(JSON.parse(text), null, 2);
+          } catch {
+            el.textContent = text;
+          }
+        } catch (e) {
+          el.textContent = "Error: " + e;
+        }
+      }
+
+      document.getElementById("btn-java").onclick = () =>
+        fetchJson("/api/java/api/hello", document.getElementById("out-java"));
+      document.getElementById("btn-python").onclick = () =>
+        fetchJson("/api/python/api/hello", document.getElementById("out-python"));
+    </script>
+  </body>
+</html>
