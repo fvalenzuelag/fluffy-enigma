@@ -1,11 +1,13 @@
 # Laboratorio Java (Spring Boot)
 
-Proyecto **Maven** mínimo con **Spring Boot 3** y Java **21**. Sirve como base para que los estudiantes escriban su propio **Dockerfile**.
+Proyecto **Maven** mínimo con **Spring Boot 3** y Java **21**. Sirve como base para que los estudiantes escriban su propio **Dockerfile**; en este repo hay además una **solución de referencia** en `Dockerfile` (y `.dockerignore`) para el docente o para corregir después.
 
 ## Estructura del proyecto
 
 ```text
 java/
+├── Dockerfile              # solución de referencia (multietapa)
+├── .dockerignore
 ├── pom.xml
 ├── README.md
 └── src/
@@ -90,13 +92,33 @@ No incluye shell ni muchas utilidades: excelente para seguridad y tamaño, pero 
 
 Documentación: [Google Distroless](https://github.com/GoogleContainerTools/distroless).
 
-### Imagenes de Spring (opcional)
+### Imágenes de Spring (opcional)
 
 El proyecto Spring publica imágenes base orientadas a **Cloud Native Buildpacks** y casos concretos; para un taller donde el alumno escribe el Dockerfile a mano, **Temurin + JAR** suele ser la combinación más clara.
 
 ---
 
-## Pistas para el Dockerfile (sin solución completa)
+## Construir y ejecutar con la solución de referencia
+
+Desde la carpeta `java/` (contexto = este proyecto):
+
+```bash
+docker build -t docker-lab-java .
+docker run --rm -p 8080:8080 docker-lab-java
+```
+
+Desde la **raíz** del repositorio:
+
+```bash
+docker build -t docker-lab-java -f java/Dockerfile java
+docker run --rm -p 8080:8080 docker-lab-java
+```
+
+La imagen final usa **Eclipse Temurin 21 JRE**; la etapa de compilación usa la imagen oficial **Maven** con el mismo JDK.
+
+---
+
+## Pistas si escribes el Dockerfile tú mismo
 
 1. **Contexto de build**: el `COPY` debe alcanzar `pom.xml` y `src/` (o copiar el JAR ya construido si compilas fuera de Docker).
 2. **Puerto**: la app escucha en **8080** (`EXPOSE 8080` y variable o comando coherente).

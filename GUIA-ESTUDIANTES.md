@@ -1,6 +1,6 @@
 # Guía para estudiantes: Docker, contenedores y Docker Compose
 
-Este repositorio es un ejemplo **muy pequeño** pensado para quien empieza con Docker. Hay **tres aplicaciones** (tres “proyectos” en carpetas) y **tres Dockerfiles** en la raíz, más un **`docker-compose.yml`** que levanta todo junto.
+Este repositorio es un ejemplo **muy pequeño** pensado para quien empieza con Docker. Hay **tres aplicaciones** (tres “proyectos” en carpetas) y **tres Dockerfiles** en la raíz, más un **`compose.yaml`** que levanta todo junto (nombre recomendado por Docker Compose v2; muchos tutoriales antiguos llaman al mismo rol `docker-compose.yml`).
 
 ## Ideas clave (en pocas palabras)
 
@@ -19,11 +19,11 @@ Este repositorio es un ejemplo **muy pequeño** pensado para quien empieza con D
 | `Dockerfile.java`        | Construye la imagen del backend Java (compila `App.java` y ejecuta `java App`). |
 | `Dockerfile`             | Construye la imagen del backend Python (instala dependencias y ejecuta `app.py`). |
 | `Dockerfile.node`        | Construye la imagen del frontend Node (`npm install` y `npm start`). |
-| `docker-compose.yml`     | Orquesta los tres servicios y define variables de entorno para las URLs internas. |
+| `compose.yaml`           | Orquesta los tres servicios y define variables de entorno para las URLs internas. |
 
 ### Nombre del proyecto (prefijo `taller-docker-*` en contenedores)
 
-En el `docker-compose.yml`, la clave de nivel superior `name: taller-docker` define el **nombre del proyecto** de Compose: si lo cambias (por ejemplo `name: curso-maria-2026`), los contenedores pasarán a llamarse `curso-maria-2026-frontend-1`, etc. Alternativas sin editar el archivo: variable de entorno `COMPOSE_PROJECT_NAME=mi-nombre` o `docker compose -p mi-nombre up`.
+En el `compose.yaml`, la clave de nivel superior `name: taller-docker` define el **nombre del proyecto** de Compose: si lo cambias (por ejemplo `name: curso-maria-2026`), los contenedores pasarán a llamarse `curso-maria-2026-frontend-1`, etc. Alternativas sin editar el archivo: variable de entorno `COMPOSE_PROJECT_NAME=mi-nombre` o `docker compose -p mi-nombre up`.
 
 ### Por qué el frontend hace de “puente”
 
@@ -31,26 +31,36 @@ Dentro de Docker Compose, los contenedores se ven por **nombre de servicio** (po
 
 ## Cómo ejecutarlo
 
-Desde la raíz del repositorio:
+Desde la raíz del repositorio (donde está `compose.yaml`):
 
 ```bash
 docker compose up --build
+```
+
+Si tu terminal no está en esa carpeta o Compose no encuentra el archivo, usa la ruta explícita:
+
+```bash
+docker compose -f compose.yaml up --build
 ```
 
 Luego abre en el navegador:
 
 - **Interfaz**: [http://localhost:3000](http://localhost:3000)
 
-Opcionalmente puedes probar los backends directamente (puertos publicados en el `docker-compose.yml`):
+Opcionalmente puedes probar los backends directamente (puertos publicados en el `compose.yaml`):
 
 - Java: [http://localhost:8080/api/hello](http://localhost:8080/api/hello)
-- Python (mapeado al host como 5001): [http://localhost:5001/api/hello](http://localhost:5001/api/hello)
+- Python: [http://localhost:5000/api/hello](http://localhost:5000/api/hello)
 
 Para parar: `Ctrl+C` o, en otra terminal, `docker compose down`.
 
+### «no configuration file provided» (o «…: not found»)
+
+Significa que **no hay ningún archivo de Compose en el directorio actual** (o no está instalado el plugin `docker compose`). Solución: `cd` a la raíz del clon, comprueba que exista `compose.yaml`, instala `docker-compose-plugin` en Linux si hace falta, o ejecuta `docker compose -f compose.yaml up` con la ruta completa al archivo.
+
 ## Cómo se relacionan Dockerfile y contexto (`build.context`)
 
-En `docker-compose.yml`, cada servicio tiene:
+En `compose.yaml`, cada servicio tiene:
 
 ```yaml
 build:
