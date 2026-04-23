@@ -2,11 +2,17 @@
 
 Proyecto **Maven** mínimo con **Spring Boot 3** y Java **21**. Sirve como base para que los estudiantes escriban su propio **Dockerfile**; en este repo hay además una **solución de referencia** en `Dockerfile` (y `.dockerignore`) para el docente o para corregir después.
 
+**Ejercicio Docker Compose + MySQL:** sigue las instrucciones en [`EXERCISE-docker-compose.md`](EXERCISE-docker-compose.md). El fichero `docker-compose.yml` incluye ya el servicio **MySQL**; el alumno debe **añadir el servicio de la aplicación** y enlazar variables de entorno. La solución de referencia está en `docker-compose.SOLUCION.yml`.
+
 ## Estructura del proyecto
 
 ```text
 java/
-├── Dockerfile              # solución de referencia (multietapa)
+├── Dockerfile                      # solución de referencia (multietapa)
+├── docker-compose.yml              # MySQL + volumen; el alumno añade el servicio app
+├── docker-compose.SOLUCION.yml     # referencia con app + db (docente / autocorrección)
+├── EXERCISE-docker-compose.md      # enunciado del ejercicio Compose + MySQL
+├── .env.example                    # plantilla de variables para Compose
 ├── .dockerignore
 ├── pom.xml
 ├── README.md
@@ -30,6 +36,7 @@ mvn spring-boot:run
 Comprueba en el navegador o con `curl`:
 
 - [http://localhost:8080/api/hello](http://localhost:8080/api/hello) — JSON de saludo
+- [http://localhost:8080/api/db-ping](http://localhost:8080/api/db-ping) — comprueba la conexión JDBC (H2 en local por defecto; MySQL con Compose)
 - [http://localhost:8080/health](http://localhost:8080/health) — comprobación simple
 
 Para generar el JAR ejecutable:

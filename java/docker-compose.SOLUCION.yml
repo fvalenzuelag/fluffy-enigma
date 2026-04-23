@@ -1,0 +1,42 @@
+# Referencia docente / autocorrección. Los alumnos completan docker-compose.yml.
+
+services:
+  db:
+    image: mysql:8.4
+    container_name: dockerlab-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Crea un archivo .env a partir de .env.example}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-dockerlab}
+      MYSQL_USER: ${MYSQL_USER:-dockerlab}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Crea un archivo .env a partir de .env.example}
+    ports:
+      - "3306:3306"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    volumes:
+      - dockerlab_mysql_data:/var/lib/mysql
+
+  app:
+    build: .
+    container_name: dockerlab-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-dockerlab}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-dockerlab}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  dockerlab_mysql_data:

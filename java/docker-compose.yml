@@ -1,0 +1,29 @@
+# Base del laboratorio: MySQL listo para probar.
+# Ejercicio: añade el servicio "app" (Spring Boot) según EXERCISE-docker-compose.md
+
+services:
+  db:
+    image: mysql:8.4
+    container_name: dockerlab-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Crea un archivo .env a partir de .env.example}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-dockerlab}
+      MYSQL_USER: ${MYSQL_USER:-dockerlab}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Crea un archivo .env a partir de .env.example}
+    ports:
+      - "3306:3306"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    volumes:
+      - dockerlab_mysql_data:/var/lib/mysql
+
+volumes:
+  dockerlab_mysql_data:
