@@ -12,13 +12,13 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>docker-lab-java</artifactId>
+    <artifactId>cartas</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>docker-lab-java</name>
-    <description>Spring Boot de práctica para taller Docker (Dockerfile y ejercicio compose en esta carpeta)</description>
+    <name>cartas</name>
+    <description>Catálogo de cartas — laboratorio Docker + Spring Boot + MySQL</description>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>17</java.version>
     </properties>
 
     <dependencies>
@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
             <groupId>com.mysql</groupId>
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>runtime</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -21,8 +21,10 @@ echo "deb [arch=$(dpkg --print-architecture) \
 ```
 
 # Instalar Docker Engine
-`sudo apt update`
-`sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin`
+```bash
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin
+```
 
 # Verificar
 `sudo docker run hello-world`
@@ -34,8 +36,11 @@ echo "deb [arch=$(dpkg --print-architecture) \
 `sudo systemctl start docker`
 
 # Asignar permisos de administrador sobre Docker a usuario 'Ubuntu'
-`sudo usermod -aG docker ubuntu`
-`newgrp docker` (solo se corre la primera vez)
+```bash
+sudo usermod -aG docker ubuntu
+newgrp docker
+``` 
+(solo se corre la primera vez)
 
 # Adicional (opcional):
 Cambiar el hostname/nombre de maquina: 
