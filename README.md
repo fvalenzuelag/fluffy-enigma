@@ -76,6 +76,9 @@ docker compose logs -f frontend
 
 # Construir solo la imagen Java (ejemplo), desde la raíz
 docker build -t demo-java -f Dockerfile.java .
+
+# Cambio de version de Java en Ubuntu
+sudo update-alternatives --config java
 ```
 
 ## Más documentación oficial
