@@ -1,0 +1,42 @@
+# Orquestación: API Flask + PostgreSQL con volumen persistente.
+# "depends_on" con condition: service_healthy evita que la API arranque antes de que Postgres acepte conexiones.
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: inventario-postgres
+    environment:
+      POSTGRES_USER: inventory
+      POSTGRES_PASSWORD: inventory
+      POSTGRES_DB: inventory
+    ports:
+      - "5432:5432"
+    volumes:
+      # init.sql solo se aplica en la primera creación del volumen
+      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # pg_isready comprueba que el servidor acepte conexiones (sin depender de tablas ya creadas).
+      test: ["CMD-SHELL", "pg_isready -U inventory -d inventory"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  api:
+    build: .
+    container_name: inventario-api
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: inventory
+      DB_USER: inventory
+      DB_PASSWORD: inventory
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

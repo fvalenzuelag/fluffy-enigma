@@ -1,0 +1,40 @@
+# MySQL 8.3 + API Spring Boot. Volumen persistente para datos entre reinicios.
+# Healthcheck: mysqladmin ping evita que la API arranque antes de que MySQL esté listo.
+
+services:
+  db:
+    image: mysql:8.3
+    container_name: empleados-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootsecret
+      MYSQL_DATABASE: employeesdb
+      MYSQL_USER: emp
+      MYSQL_PASSWORD: empsecret
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-prootsecret"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  api:
+    build: .
+    container_name: empleados-api
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: employeesdb
+      DB_USER: emp
+      DB_PASSWORD: empsecret
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysqldata:

@@ -1,0 +1,13 @@
+{
+  "name": "peliculas-api",
+  "version": "1.0.0",
+  "description": "API REST de películas en memoria (práctica Docker)",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
