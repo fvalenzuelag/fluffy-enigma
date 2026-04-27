@@ -11,7 +11,7 @@ Este proyecto sigue la guía **«Dockerfile y Docker Compose con Spring Boot + M
 ## Requisitos previos
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) o Docker Engine con **Docker Compose** habilitado.
-- **Java 17** y **Maven** instalados para compilar el proyecto (`mvn clean package`).
+- **Java 17** y **Maven** solo si quieres compilar o ejecutar tests fuera de Docker (`mvn test` / `mvn package`). La imagen Docker se puede construir **solo con Docker** (el `Dockerfile` compila con Maven en una etapa intermedia).
 
 ## Estructura del proyecto
 
@@ -19,7 +19,7 @@ Tras compilar, la carpeta debería ser similar a esta:
 
 ```text
 java/
-├── Dockerfile                      # imagen que copia el JAR ya compilado
+├── Dockerfile                      # multi-etapa: Maven compila + JRE ejecuta el JAR
 ├── docker-compose.yml              # MySQL + app (laboratorio guiado)
 ├── docker-compose.SOLUCION.yml     # misma idea, referencia docente
 ├── .dockerignore
@@ -66,7 +66,7 @@ En PowerShell puedes usar `Invoke-RestMethod` o comillas simples en el JSON seg�
 
 La aplicación usa la URL JDBC contra el host **`db`** (nombre del servicio MySQL en Compose), **no** `localhost`, y credenciales por variables de entorno:
 
-- `spring.datasource.url=jdbc:mysql://db:3306/cartasdb?...`
+- `spring.datasource.url` por defecto apunta a `jdbc:mysql://db:3306/cartasdb?...` (Compose). En otros entornos define **`SPRING_DATASOURCE_URL`** (por ejemplo en CI o EC2 hacia otro host de MySQL).
 - `spring.datasource.username=${DB_USERNAME}`
 - `spring.datasource.password=${DB_PASSWORD}`
 
@@ -76,34 +76,32 @@ Los valores concretos de usuario y contraseña se definen en **Docker Compose** 
 
 ## Parte 2: Dockerfile
 
-El `Dockerfile` de este repo copia el JAR generado por Maven:
+El `Dockerfile` es **multietapa**:
 
-- Nombre del artefacto: **`cartas-0.0.1-SNAPSHOT.jar`** (coincide con `artifactId` y `version` en `pom.xml`).
-- Imagen base: **Eclipse Temurin 17 JRE (Alpine)** (equivalente moderno a la imagen `openjdk:17-jdk-alpine` que suele citarse en guías; ajusta la línea `FROM` si tu curso exige otra imagen).
+1. **Etapa `build`:** imagen **Maven + Temurin 17**, copia `pom.xml` y `src/`, ejecuta `mvn package -DskipTests`.
+2. **Etapa final:** **Eclipse Temurin 17 JRE (Alpine)** y solo el JAR **`cartas-0.0.1-SNAPSHOT.jar`** generado en la etapa anterior.
 
-Si cambias `artifactId` o `version` en `pom.xml`, debes actualizar la ruta del `COPY` en el `Dockerfile`.
+MySQL **no** va dentro de esta imagen: va en el servicio `db` de **Docker Compose** (u otro contenedor / RDS) en la misma red o URL que indiques con `SPRING_DATASOURCE_URL`.
+
+Si cambias `artifactId` o `version` en `pom.xml`, actualiza la ruta del `COPY --from=build` en el `Dockerfile`.
 
 ---
 
-## Parte 3: Compilar la aplicación
+## Parte 3: Compilar la aplicación (opcional fuera de Docker)
 
-Desde la carpeta `java/`:
+Si trabajas sin multietapa local:
 
 ```bash
 mvn clean package
 ```
 
-Comprueba que exista el JAR, por ejemplo:
-
-```text
-target/cartas-0.0.1-SNAPSHOT.jar
-```
-
-Si el archivo no existe, `docker build` fallará en el paso `COPY`.
+Comprueba que exista `target/cartas-0.0.1-SNAPSHOT.jar`. Con el `Dockerfile` actual **no es obligatorio**: basta con la Parte 4.
 
 ---
 
 ## Parte 4: Construir la imagen Docker
+
+Desde la carpeta `java/`:
 
 ```bash
 docker build -t cartas-app:1.0 .
@@ -199,7 +197,7 @@ docker compose down -v
 
 | Síntoma | Causa probable | Qué hacer |
 |--------|----------------|-----------|
-| `COPY failed` en `docker build` | No existe el JAR o el nombre en el `Dockerfile` no coincide con `target/` | Ejecutar `mvn clean package` y revisar el nombre en `target/` |
+| Fallo en etapa `build` del `docker build` | Error de compilación Maven o nombre de JAR distinto al del `COPY --from=build` | Revisar logs de la etapa Maven; alinear `pom.xml` y `Dockerfile` |
 | La app no conecta a MySQL | La URL usa `localhost` en lugar del servicio Compose | En Docker Compose el host debe ser **`db`** (como en `application.properties`) |
 | Cambios en código sin efecto | Compose no reconstruyó la imagen | `docker compose up --build` |
 | Puerto 8080 ocupado | Otra aplicación usa el puerto | Cambiar el mapeo, por ejemplo `8081:8080` en `docker-compose.yml` |
@@ -249,6 +247,6 @@ La aplicación **no** debe usar `localhost` para MySQL dentro de Compose: debe u
 
 ## Anexo: elección de imagen base Java
 
-Este laboratorio usa **Java 17** y una imagen **Eclipse Temurin JRE Alpine** en el `Dockerfile`. Otras familias habituales (Corretto, Microsoft Build of OpenJDK, imágenes multietapa con Maven) son válidas en otros proyectos; para este taller basta con **JAR + JRE** y un `COPY` del artefacto compilado localmente.
+Este laboratorio usa **Java 17**, **Maven** en la etapa de compilación y **Eclipse Temurin JRE Alpine** en la imagen final. Otras familias (Corretto, Microsoft Build of OpenJDK) son válidas en otros proyectos.
 
 Documentación: [Eclipse Temurin en Docker Hub](https://hub.docker.com/_/eclipse-temurin).

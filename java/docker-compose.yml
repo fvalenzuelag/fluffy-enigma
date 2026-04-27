@@ -1,3 +1,4 @@
+# MySQL + Spring Boot en la misma red Docker (host JDBC: db).
 version: "3.8"
 
 services:
@@ -30,6 +31,8 @@ services:
     environment:
       DB_USERNAME: cartas
       DB_PASSWORD: cartas123
+      # Opcional; por defecto application.properties usa jdbc:mysql://db:3306/...
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/cartasdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     depends_on:
       db:
         condition: service_healthy
